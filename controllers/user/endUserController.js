@@ -24,22 +24,19 @@ export const getTokenIncentives = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-
-
-export const updateTokenIncentives = async (req, res ) => {
+export const updateTokenIncentives = async (req, res) => {
   try {
-    console.log("update controller")
+    console.log("update controller");
     let { id } = req.params;
     let userId = [];
-    userId.push(id)
+    userId.push(id);
     const tokenIncentives = new TokenIncentives({
       random: req.body.random,
-      userId
-
+      userId,
     });
 
     await tokenIncentives.save();
@@ -55,26 +52,32 @@ export const updateTokenIncentives = async (req, res ) => {
   }
 };
 
-export const createTokenIncentives = async (req,res ) => {
+export const createTokenIncentives = async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
 
+    // Validate and sanitize the subDivision input
+    const subDivision = req.body.subDivision;
+    if (!validator.isAlphanumeric(subDivision, "en-US", { ignore: " " })) {
+      return res.status(400).json({ message: "Invalid subDivision format" });
+    }
+    const sanitizedSubDivision = validator.escape(subDivision);
 
     const existingIncentive = await TokenIncentives.findOne({
-      subDivision: req.body.subDivision,
+      subDivision: sanitizedSubDivision,
       year: currentYear,
     });
 
     if (existingIncentive) {
       return res.status(400).json({
-        message: "Token incentives for this subdivision and year already exist.",
+        message:
+          "Token incentives for this subdivision and year already exist.",
       });
     }
     const tokenIncentives = new TokenIncentives({
-      subDivision: req.body.subDivision, 
+      subDivision: req.body.subDivision,
       year: currentYear,
-      tokenBalance: req.body.tokenBalance
-
+      tokenBalance: req.body.tokenBalance,
     });
 
     await tokenIncentives.save();
@@ -90,50 +93,29 @@ export const createTokenIncentives = async (req,res ) => {
   }
 };
 
-
-
-
 //Get All the Complaints that are registered by this user
-export const getAllComplaints = async (req, id,res) => {
-
-    try {
-      console.log("trying")
-      const complaints = await Complaint.find({userId:id });
-      return res.status(200).json({ complaints });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-  };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export const getAllComplaints = async (req, id, res) => {
+  try {
+    console.log("trying");
+    const complaints = await Complaint.find({ userId: id });
+    return res.status(200).json({ complaints });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 //Get A specific Complaint by the user
 export const getComplaintById = async (req, res) => {
-    try {
-      const complaintId = req.params.id;
-      const complaint = await Complaint.findOne({ _id: complaintId });
-      if (!complaint) {
-        return res.status(404).json({ message: 'Complaint not found' });
-      }
-      return res.status(200).json({ complaint });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
+  try {
+    const complaintId = req.params.id;
+    const complaint = await Complaint.findOne({ _id: complaintId });
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
     }
-  };
+    return res.status(200).json({ complaint });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
