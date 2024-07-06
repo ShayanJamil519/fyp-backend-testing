@@ -25,7 +25,15 @@ export const UserSignup = async (req, role, res) => {
       crop: "scale",
     });
     const validateEmail = async (email) => {
-      let user = await User.findOne({ email });
+      // Validate the email format
+      if (!validator.isEmail(email)) {
+        throw new Error("Invalid email format");
+      }
+
+      // Sanitize the email
+      const sanitizedEmail = validator.normalizeEmail(email);
+
+      let user = await User.findOne({ email: sanitizedEmail });
       return user ? false : true;
     };
 
