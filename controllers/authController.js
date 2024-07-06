@@ -121,6 +121,15 @@ export const UserSignup = async (req, role, res) => {
 
 export const userLogin = async (req, res) => {
   let { email, password } = req;
+
+  // Validate the email format
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ message: "Invalid email format" });
+  }
+
+  // Sanitize the email
+  email = validator.normalizeEmail(email);
+
   const user = await User.findOne({ email });
   if (!user) {
     return res.status(404).json({
